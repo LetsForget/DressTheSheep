@@ -45,14 +45,21 @@ namespace UI
 
         private void Generate(GameObject model, ConstructorInfo constructor, int paramsQuan, ParameterInputField[] parameters)
         {
-            GameObject modelSpawned = Instantiate(model, _spawnPlace.position, _spawnPlace.rotation);
-
             object[] objParams = new object[paramsQuan];
             for (int i = 0; i < paramsQuan; i++)
             {
-                objParams[i] = parameters[i].GetValue();
+                if (parameters[i].GetValue(out object value))
+                {
+                    objParams[i] = value;
+                }
+                else
+                {
+                    Notifier.NotifyPlayer(parameters[i].ParameterName + " not filled!", 3);
+                    return;
+                }
             }
 
+            GameObject modelSpawned = Instantiate(model, _spawnPlace.position, _spawnPlace.rotation);
             AbstractWearable wearable = constructor.Invoke(objParams) as AbstractWearable;
 
             WearableContainer container = modelSpawned.AddComponent<WearableContainer>();
